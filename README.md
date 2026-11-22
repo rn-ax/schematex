@@ -11,7 +11,7 @@
 > - `.github/` is rebuilt around org conventions (CI through mise, a CalVer GitHub Release with the npm tarball on every push to `main`, a weekly upstream-sync pull request, settings, CODEOWNERS). Upstream's npm publish workflow is removed.
 > - `mise.toml`, `.editorconfig` and `renovate.json` are added.
 > - Upstream's agent instruction files (`CLAUDE.md`, `.claude/`) are deleted, and `.github/check-agent-files` keeps them out: CI fails when one exists, and the upstream-sync workflow strips them from the merge.
-> - Removed because the fork never uses them: the Vercel deploy configuration (`vercel.json`, `website/vercel.json`) and the separately published `packages/mcp`. The website content, `visual-eval/cases` and the preview and evaluation scripts stay in place because the build and the tests read them, or because upstream keeps editing them.
+> - Removed because the fork never uses them and nothing depends on them: the Vercel deploy configuration (`vercel.json`, `website/vercel.json`), the separately published `packages/mcp`, the website's `llms.txt` routes, Sentry and instrumentation files, `verify-gallery.mjs` and README, `preview-pert/`, and `CONTRIBUTING.md`. The website content, `visual-eval/cases` and the preview and evaluation scripts stay in place because the build and the tests read them, or because upstream keeps editing them.
 >
 > Install a build with `gh release download --repo rn-ax/schematex --pattern '*.tgz'` and `npm install <file>.tgz`.
 
