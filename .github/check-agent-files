@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Lists the tracked files that instruct or configure coding agents (CLAUDE.md, AGENTS.md, GEMINI.md,
+# Cursor, Windsurf, Cline, Codex, Gemini and Copilot instruction files, and their directories).
+#
+# Usage: check-agent-files [--remove]
+#
+# Without arguments it prints the matching paths and exits 1 when there are any, 0 when there are none.
+# With --remove it deletes them from the index and the working tree, which also resolves a modify/delete
+# conflict on such a file in favour of deleting it. Exit 0 afterwards.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+pattern='(^|/)(claude\.md|agents\.md|gemini\.md|\.cursorrules|\.windsurfrules|\.clinerules|copilot-instructions\.md)$|(^|/)(\.claude|\.cursor|\.windsurf|\.codex|\.gemini|\.agents)/|^\.github/instructions/'
+matches="$(git ls-files | sort -u | grep -i -E "$pattern" || true)"
+
+case "${1:-}" in
+  --remove)
+    if [ -n "$matches" ]; then
+      printf '%s\n' "$matches" | xargs git rm -q -f --
+      printf 'removed:\n%s\n' "$matches"
+    fi
+    ;;
+  "")
+    if [ -n "$matches" ]; then
+      printf 'Agent instruction files are not kept in this fork:\n%s\n' "$matches" >&2
+      exit 1
+    fi
+    ;;
+  *)
+    echo "Usage: check-agent-files [--remove]" >&2
+    exit 2
+    ;;
+esac

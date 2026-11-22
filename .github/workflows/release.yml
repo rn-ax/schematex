@@ -1,0 +1,33 @@
+name: Release
+
+# Every push to main builds the library and publishes it as a GitHub Release
+# named with a CalVer version (YYYY.MM.DD.<run number>). The release carries the
+# npm tarball, which consumers install with `npm install <tarball>`.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
+      - run: npm ci
+      - run: npm run build
+      - name: Pack and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          VERSION="$(date -u +%Y.%m.%d).${GITHUB_RUN_NUMBER}"
+          UPSTREAM_VERSION="$(node -p "require('./package.json').version")"
+          TARBALL="$(npm pack --silent)"
+          mv "$TARBALL" "schematex-${VERSION}.tgz"
+          gh release create "v${VERSION}" "schematex-${VERSION}.tgz" \
+            --target "$GITHUB_SHA" \
+            --title "$VERSION" \
+            --notes "Build of schematex ${UPSTREAM_VERSION} with this fork's changes, from commit ${GITHUB_SHA}."

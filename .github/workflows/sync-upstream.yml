@@ -1,0 +1,50 @@
+name: Sync upstream
+
+# Opens a pull request that merges upstream's default branch into this fork,
+# without upstream's agent instruction files. A person reviews and merges it.
+# A merge conflict fails the run and is resolved by hand.
+on:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Merge upstream into a branch and open a pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add upstream https://github.com/SchemaTex/SchemaTex.git
+          git fetch upstream main
+          if git merge-base --is-ancestor upstream/main HEAD; then
+            echo "Already up to date with upstream."
+            exit 0
+          fi
+          BRANCH="sync-upstream-$(date -u +%Y%m%d)"
+          git checkout -b "$BRANCH"
+          # Upstream's agent instruction files are not kept here: remove them from the merge, which
+          # also settles a modify/delete conflict on one of them in favour of deleting it.
+          git merge --no-commit --no-ff upstream/main || true
+          .github/check-agent-files --remove
+          if [ -n "$(git diff --name-only --diff-filter=U)" ]; then
+            echo "Merge conflicts to resolve by hand:" >&2
+            git diff --name-only --diff-filter=U >&2
+            exit 1
+          fi
+          git commit --no-edit
+          git push origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" \
+            --title "Sync upstream" \
+            --body "Merges SchemaTex/SchemaTex main into this fork."

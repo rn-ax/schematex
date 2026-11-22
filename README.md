@@ -4,6 +4,17 @@
   <em>Free. Fully open source. Made for AI.</em>
 </p>
 
+> [!IMPORTANT]
+> This is rn-ax's fork of [SchemaTex/SchemaTex](https://github.com/SchemaTex/SchemaTex). It exists to add breadboard parts and labels the upstream breadboard engine does not have yet. Drop the fork and switch back to upstream once upstream ships a breadboard transistor, an infrared LED, rail +/- signs and LED polarity marks.
+>
+> Changes from upstream:
+> - `.github/` is rebuilt around org conventions (CI through mise, a CalVer GitHub Release with the npm tarball on every push to `main`, a weekly upstream-sync pull request, settings, CODEOWNERS). Upstream's npm publish workflow is removed.
+> - `mise.toml`, `.editorconfig` and `renovate.json` are added.
+> - Upstream's agent instruction files (`CLAUDE.md`, `.claude/`) are deleted, and `.github/check-agent-files` keeps them out: CI fails when one exists, and the upstream-sync workflow strips them from the merge.
+> - Removed because the fork never uses them and nothing depends on them: the Vercel deploy configuration (`vercel.json`, `website/vercel.json`), the separately published `packages/mcp`, the website's `llms.txt` routes, Sentry and instrumentation files, `verify-gallery.mjs` and README, `preview-pert/`, and `CONTRIBUTING.md`. The website content, `visual-eval/cases` and the preview and evaluation scripts stay in place because the build and the tests read them, or because upstream keeps editing them.
+>
+> Install a build with `gh release download --repo rn-ax/schematex --pattern '*.tgz'` and `npm install <file>.tgz`.
+
 <p align="center">
   McGoldrick genograms · NSGC pedigrees · IEC 61131-3 ladder logic · IEEE 315 single-line diagrams · Newick phylogenetic trees · Howard-Raiffa decision trees · Moreno sociograms · and more — all from a tiny text DSL, with zero runtime dependencies.
 </p>
